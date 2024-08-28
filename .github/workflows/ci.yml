@@ -1,0 +1,34 @@
+name: CIPipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  IMAGE_NAME_POLICY: ghcr.io/kaeyros-analytics/sema_privacy_policy:latest
+  
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u "${{ secrets.USERNAME }}" --password-stdin
+
+      - name: Build the Docker image 
+        run: |
+          docker build -t ${{ env.IMAGE_NAME_POLICY }} .
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          docker push ${{ env.IMAGE_NAME_POLICY }}
